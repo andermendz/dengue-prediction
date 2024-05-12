@@ -32,18 +32,18 @@
           });
       
           socket.on("chunk", function(data) {
-            const { predicted_tip_cas, predicted_clasfinal } = data;
+            const { predicted_conducta, predicted_clasfinal } = data;
             // Corrected to use template literals for dynamic text
-            $("#classified-answer").text(`Predicted tip_cas: ${predicted_tip_cas}, Predicted clas_final: ${predicted_clasfinal}`);
+            $("#classified-answer").text(`Predicted tip_cas: ${predicted_conducta}, Predicted clas_final: ${predicted_clasfinal}`);
           });
       
           socket.on("response", function(data) {
             $("#classified-answer").empty();
             $("#aianswer").empty();
       
-            const { predicted_tip_cas, predicted_clasfinal, gpt_response } = data;
+            const { predicted_conducta, predicted_clasfinal, gpt_response } = data;
             // Corrected to use template literals for dynamic text
-            $("#classified-answer").text(`Predicted tip_cas: ${predicted_tip_cas}, Predicted clas_final: ${predicted_clasfinal}`);
+            $("#classified-answer").text(`Predicted tip_cas: ${predicted_conducta}, Predicted clas_final: ${predicted_clasfinal}`);
       
             // The AI unveils its creation, word by word...
             let responseChunks = gpt_response.split(" ");
@@ -96,13 +96,34 @@
                     <label for="malgias" class="ml-2 text-gray-700">Dolores musculares</label>
                 </div>
                 <div class="flex items-center mb-4">
-                    <input id="artralgia" type="checkbox" name="artralgia" value="1" class="form-checkbox h-5 w-5 text-gray -600">
+                    <input id="artralgia" type="checkbox" name="artralgia" value="1" class="form-checkbox h-5 w-5 text-gray-600">
                     <label for="artralgia" class="ml-2 text-gray-700">Dolor en las articulaciones</label>
                 </div>
                 <div class="flex items-center mb-4">
                     <input id="erupcionr" type="checkbox" name="erupcionr" value="1" class="form-checkbox h-5 w-5 text-gray-600">
                     <label for="erupcionr" class="ml-2 text-gray-700">Erupción cutánea</label>
                 </div>
+                <div class="flex items-center mb-4">
+                    <input id="dolor_abdo" type="checkbox" name="dolor_abdo" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="dolor_abdo" class="ml-2 text-gray-700">Dolor abdominal</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="vomito" type="checkbox" name="vomito" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="vomito" class="ml-2 text-gray-700">Vómito</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="diarrea" type="checkbox" name="diarrea" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="diarrea" class="ml-2 text-gray-700">Diarrea</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="hipotensio" type="checkbox" name="hipotensio" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="hipotensio" class="ml-2 text-gray-700">Hipotensión</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="hepatomeg" type="checkbox" name="hepatomeg" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="hepatomeg" class="ml-2 text-gray-700">Hepatomegalia</label>
+                </div>
+              
             </div>
             <div class="flex items-center justify-between">
                 <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Submit">

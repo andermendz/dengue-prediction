@@ -5,13 +5,28 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
-from g4f.client import Client
 from g4f.client import AsyncClient
 import asyncio
 
 app = Flask(__name__, template_folder='.')
 socketio = SocketIO(app)
 client = AsyncClient()
+
+def categorize_age(edad):
+    """Categorize the numerical age into predefined age groups."""
+    if edad < 2:
+        return 'PRIMERA INFANCIA'
+    elif edad < 12:
+        return 'INFANCIA'
+    elif edad < 18:
+        return 'ADOLESCENCIA'
+    elif edad < 30:
+        return 'JOVENES'
+    elif edad < 60:
+        return 'ADULTEZ'
+    else:
+        return 'PERSONA MAYOR'
+
 
 @socketio.on('connect')
 def handle_connect():
@@ -22,62 +37,79 @@ async def index():
     if request.method == 'POST':
         # Get data from form
         edad = int(request.form.get('edad'))
+        # Translate numerical age to category and encode
+        def_clas_edad = categorize_age(edad)
+        
         sexo = request.form.get('sexo')
-        # Convert 'sexo' to 0/1
-        sexo = 0 if sexo == 'M' else 1
-        fiebre = int(request.form.get('fiebre', 0))
-        cefalea = int(request.form.get('cefalea', 0))
-        dolrretroo = int(request.form.get('dolrretroo', 0))
-        malgias = int(request.form.get('malgias', 0))
-        artralgia = int(request.form.get('artralgia', 0))
-        erupcionr = int(request.form.get('erupcionr', 0))
+        # Convert 'sexo' to 'Masculino' or 'Femenino'
+        sexo = 'Masculino' if sexo == 'M' else 'Femenino'
+        fiebre = 'Sí' if request.form.get('fiebre', 0) == '1' else 'No'
+        cefalea = 'Sí' if request.form.get('cefalea', 0) == '1' else 'No'
+        dolrretroo = 'Sí' if request.form.get('dolrretroo', 0) == '1' else 'No'
+        malgias = 'Sí' if request.form.get('malgias', 0) == '1' else 'No'
+        artralgia = 'Sí' if request.form.get('artralgia', 0) == '1' else 'No'
+        erupcionr = 'Sí' if request.form.get('erupcionr', 0) == '1' else 'No'
+        dolor_abdo = 'Sí' if request.form.get('dolor_abdo', 0) == '1' else 'No'
+        vomito = 'Sí' if request.form.get('vomito', 0) == '1' else 'No'
+        diarrea = 'Sí' if request.form.get('diarrea', 0) == '1' else 'No'
+        hipotensio = 'Sí' if request.form.get('hipotensio', 0) == '1' else 'No'
+        hepatomeg = 'Sí' if request.form.get('hepatomeg', 0) == '1' else 'No'
 
-        # Paso 1: Cargar el dataset y preprocesamiento de datos
-        data = pd.read_csv('dengue.csv')
-        # Convertir variables categóricas 'Si'/'No' a 1/0 y 'sexo' a 0/1
-        yes_no_columns = ['fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg', 'pac_hos']
+        # Load the dataset and preprocess data
+        data = pd.read_csv('dengue2.csv')
+        # Convert categorical 'Si'/'No' to 1/0 and 'sexo' to 0/1
+        yes_no_columns = ['fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
         for col in yes_no_columns:
-            data[col] = data[col].map({'Si': 1, 'No': 0})
+            data[col] = data[col].map({1: 1, 0: 0})
         data['sexo'] = data['sexo'].map({'M': 0, 'F': 1})
         # Encoding other categorical variables using LabelEncoder
-        label_columns = ['tip_cas', 'clasfinal', 'conducta']
+        label_columns = ['clasfinal', 'conducta']
         label_encoders = {}
         for col in label_columns:
             le = LabelEncoder()
             data[col] = le.fit_transform(data[col])
             label_encoders[col] = le
 
-        # Define features
-        features = ['edad', 'sexo', 'fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr']
+        # Define features including 'def_clas_edad'
+        features = ['def_clas_edad', 'sexo', 'fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
+        
+        le_def_clas_edad = LabelEncoder()
+        all_possible_categories = np.array(['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR'])  # All categories that `categorize_age` can produce
+        le_def_clas_edad.fit(all_possible_categories)
+        data['def_clas_edad'] = le_def_clas_edad.transform(data['def_clas_edad'])
 
-        # Paso 2: División de datos
+        # Split data
         X = data[features].values
         y_clasfinal = data['clasfinal']
-        y_tip_cas = data['tip_cas']
-        X_train, X_test, y_clasfinal_train, y_clasfinal_test, y_tip_cas_train, y_tip_cas_test = train_test_split(X, y_clasfinal, y_tip_cas, test_size=0.2, random_state=42)
+        y_conducta = data['conducta']
+        
+        X_train, X_test, y_train, y_test = train_test_split(X, np.column_stack((y_clasfinal, y_conducta)), test_size=0.2, random_state=42)
+        y_clasfinal_train, y_conducta_train = y_train[:, 0], y_train[:, 1]
 
-        # Paso 3 y 4: Selección y entrenamiento del modelo
+        # Select and train the model
         model_clasfinal = RandomForestClassifier(n_estimators=100, random_state=42)
-        model_tip_cas = RandomForestClassifier(n_estimators=100, random_state=42)
+        model_conducta = RandomForestClassifier(n_estimators=100, random_state=42)
         model_clasfinal.fit(X_train, y_clasfinal_train)
-        model_tip_cas.fit(X_train, y_tip_cas_train)
+        model_conducta.fit(X_train, y_conducta_train)
+
+        # Prepare user data including 'def_clas_edad'
+        user_data = [le_def_clas_edad.transform([categorize_age(edad)])[0]] + [1 if sexo == 'Masculino' else 0, 1 if fiebre == 'Sí' else 0, 1 if cefalea == 'Sí' else 0, 1 if dolrretroo == 'Sí' else 0, 1 if malgias == 'Sí' else 0, 1 if artralgia == 'Sí' else 0, 1 if erupcionr == 'Sí' else 0, 1 if dolor_abdo == 'Sí' else 0, 1 if vomito == 'Sí' else 0, 1 if diarrea == 'Sí' else 0, 1 if hipotensio == 'Sí' else 0, 1 if hepatomeg == 'Sí' else 0]
 
         # Make predictions
-        user_data = [edad, sexo, fiebre, cefalea, dolrretroo, malgias, artralgia, erupcionr]
         predicted_clasfinal = model_clasfinal.predict([user_data])[0]
-        predicted_tip_cas = model_tip_cas.predict([user_data])[0]
+        predicted_conducta = model_conducta.predict([user_data])[0]
 
         # Decode the predictions
         predicted_clasfinal = label_encoders['clasfinal'].inverse_transform([predicted_clasfinal])[0]
-        predicted_tip_cas = label_encoders['tip_cas'].inverse_transform([predicted_tip_cas])[0]
+        predicted_conducta = label_encoders['conducta'].inverse_transform([predicted_conducta])[0]
 
         # Make the OpenAI API call
-        user_symptoms = f"Edad: {edad}, Sexo: {sexo}, Fiebre: {'Sí' if fiebre else 'No'}, Dolor de cabeza: {'Sí' if cefalea else 'No'}, Dolor detrás de los ojos: {'Sí' if dolrretroo else 'No'}, Dolores musculares: {'Sí' if malgias else 'No'}, Dolor en las articulaciones: {'Sí' if artralgia else 'No'}, Erupción cutánea: {'Sí' if erupcionr else 'No'}"
+        user_symptoms = f"Edad: {def_clas_edad}, Sexo: {sexo}, Fiebre: {fiebre}, Dolor de cabeza: {cefalea}, Dolor detrás de los ojos: {dolrretroo}, Dolores musculares: {malgias}, Dolor en las articulaciones: {artralgia}, Erupción cutánea: {erupcionr}, Dolor abdominal: {dolor_abdo}, Vómito: {vomito}, Diarrea: {diarrea}, Hipotensión: {hipotensio}, Hepatomegalia: {hepatomeg}"
         stream = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Eres un asistente virtual medico"},
-                {"role": "user", "content": f"Dado los siguientes síntomas: {user_symptoms}, el tipo de caso predicho es: {predicted_tip_cas}, y la clasificación final predicha es: {predicted_clasfinal}. Por favor, dame una respuesta médica adecuada."}
+                {"role": "system", "content": "Eres un asistente virtual médico"},
+                {"role": "user", "content": f"Dado los siguientes síntomas: {user_symptoms}, y la clasificación final predicha es: {predicted_clasfinal}, cuya conducta puede ser {predicted_conducta}"}
             ],
             stream=True
         )
@@ -90,7 +122,7 @@ async def index():
             socketio.emit('chunk', {'data': partial_response})
 
         # Emit the final response to the client
-        socketio.emit('response', {'predicted_clasfinal': predicted_clasfinal, 'predicted_tip_cas': predicted_tip_cas, 'gpt_response': gpt_response})
+        socketio.emit('response', {'predicted_clasfinal': predicted_clasfinal, 'predicted_conducta': predicted_conducta, 'gpt_response': gpt_response})
 
     return render_template('index.html')
 
