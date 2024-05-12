@@ -5,50 +5,55 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
-<style>
-    /* Add this CSS for typing animation */
-    .typing {
-        border-right: .2em solid;
-        white-space: nowrap;
-        overflow: hidden;    
-        animation: typing 3.5s steps(40, end),
-                   blink-caret .75s step-end infinite;
-    }
-    /* Typing animation */
-    @keyframes typing {
-        from { width: 0 }
-        to { width: 100% }
-    }
-    /* Cursor animations */
-    @keyframes blink-caret {
-        from, to { border-color: transparent }
-        50% { border-color: black }
-    }
-</style>
-<body class="bg-gray-100 flex flex-col items-center justify-center h-screen">
-    <form id="predictionForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="edad">Edad:</label>
-            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" id="edad" name="edad">
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="flex">
+        <form id="predictionForm" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mr-4">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="edad">Edad:</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" id="edad" name="edad" min="1" max="99">
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="sexo">Sexo:</label>
+                <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sexo" name="sexo">
+                    <option value="M">M</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Síntomas:</label>
+                <div class="flex items-center mb-4">
+                    <input id="fiebre" type="checkbox" name="fiebre" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="fiebre" class="ml-2 text-gray-700">Fiebre</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="cefalea" type="checkbox" name="cefalea" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="cefalea" class="ml-2 text-gray-700">Dolor de cabeza</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="dolrretroo" type="checkbox" name="dolrretroo" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="dolrretroo" class="ml-2 text-gray-700">Dolor detrás de los ojos</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="malgias" type="checkbox" name="malgias" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="malgias" class="ml-2 text-gray-700">Dolores musculares</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="artralgia" type="checkbox" name="artralgia" value="1" class="form-checkbox h-5 w-5 text-gray -600">
+                    <label for="artralgia" class="ml-2 text-gray-700">Dolor en las articulaciones</label>
+                </div>
+                <div class="flex items-center mb-4">
+                    <input id="erupcionr" type="checkbox" name="erupcionr" value="1" class="form-checkbox h-5 w-5 text-gray-600">
+                    <label for="erupcionr" class="ml-2 text-gray-700">Erupción cutánea</label>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Submit">
+            </div>
+        </form>
+        <div class="bg-white shadow-md rounded p-8 ml-4 max-w-60">
+            <p id="answer" class="text-gray-700"></p>
         </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="sexo">Sexo:</label>
-            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" id="sexo" name="sexo">
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="fiebre">Fiebre:</label>
-            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" id="fiebre" name="fiebre">
-        </div>
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="diarrea">Diarrea:</label>
-            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" id="diarrea" name="diarrea">
-        </div>
-        <div class="flex items-center justify-between">
-            <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Submit">
-        </div>
-    </form>
-    <p id="predicted_clasfinal" class="text-center text-gray-500 text-xs"></p>
-    <p id="predicted_tip_cas" class="text-center text-gray-500 text-xs"></p>
+    </div>
     <script>
         $(document).ready(function(){
             $("#predictionForm").on('submit', function(event){
@@ -59,15 +64,15 @@
                     data: $(this).serialize(),
                     success: function(data){
                         // Empty the text before adding new text
-                        $("#predicted_clasfinal").empty();
-                        $("#predicted_tip_cas").empty();
+                        $("#answer").empty();
                         // Add the typing class for animation
-                        $("#predicted_clasfinal").addClass("typing").text("Predicted clasfinal: " + data.predicted_clasfinal);
-                        $("#predicted_tip_cas").addClass("typing").text("Predicted tip_cas: " + data.predicted_tip_cas);
+                        $("#answer").text("Predicted tip_cas: " + data.predicted_tip_cas + ", Predicted clas_final: " + data.predicted_clasfinal);
+                        // Display the GPT chat response in the #answer div
+                        $("#answer").append("<br>Respuesta del chat GPT: " + data.gpt_response);
                     }
                 });
             });
         });
-        </script>
+    </script>
 </body>
 </html>
