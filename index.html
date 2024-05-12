@@ -4,6 +4,42 @@
     <title>Dengue Prediction</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" crossorigin="anonymous"></script>
+
+    <script>
+        var socket = io();
+        $(document).ready(function() {
+            $("#predictionForm").on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: '/',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(data) {
+                        // This function will not be called since we're using WebSockets
+                    }
+                });
+        
+                // Clear the aianswer field before receiving new chunks
+                $("#aianswer").empty();
+            });
+        
+            $("#classified-answer").empty();
+            $("#aianswer").empty();
+        
+            socket.on('chunk', function(data) {
+                $("#classified-answer").text("Predicted tip_cas: " + data.predicted_tip_cas + ", Predicted clas_final: " + data.predicted_clasfinal);
+                $("#aianswer").append(data.data); // Append the new data to the existing content
+            });
+        
+            socket.on('response', function(data) {
+                $("#aianswer").empty();
+                $("#classified-answer").empty();
+                $("#classified-answer").text("Predicted tip_cas: " + data.predicted_tip_cas + ", Predicted clas_final: " + data.predicted_clasfinal);
+                $("#aianswer").append(data.gpt_response);
+            });
+        });
+        </script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="flex">
@@ -50,29 +86,11 @@
                 <input class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit" value="Submit">
             </div>
         </form>
-        <div class="bg-white shadow-md rounded p-8 ml-4 max-w-60">
-            <p id="answer" class="text-gray-700"></p>
+        <div class="bg-white shadow-md rounded p-8 ml-4 ">
+            <p id="classified-answer" class="text-gray-700"></p>
+            <p id="aianswer" class="text-gray-700"></p>
         </div>
     </div>
-    <script>
-        $(document).ready(function(){
-            $("#predictionForm").on('submit', function(event){
-                event.preventDefault();
-                $.ajax({
-                    url: '/',
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: function(data){
-                        // Empty the text before adding new text
-                        $("#answer").empty();
-                        // Add the typing class for animation
-                        $("#answer").text("Predicted tip_cas: " + data.predicted_tip_cas + ", Predicted clas_final: " + data.predicted_clasfinal);
-                        // Display the GPT chat response in the #answer div
-                        $("#answer").append("<br>Respuesta del chat GPT: " + data.gpt_response);
-                    }
-                });
-            });
-        });
-    </script>
+ 
 </body>
 </html>

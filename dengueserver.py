@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, render_template
+from flask_socketio import SocketIO, emit
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -9,7 +10,12 @@ from g4f.client import AsyncClient
 import asyncio
 
 app = Flask(__name__, template_folder='.')
+socketio = SocketIO(app)
 client = AsyncClient()
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
 
 @app.route('/', methods=['GET', 'POST'])
 async def index():
@@ -80,11 +86,13 @@ async def index():
         async for chunk in stream:
             partial_response = chunk.choices[0].delta.content or ""
             gpt_response += chunk.choices[0].delta.content or ""
-            print(partial_response, end="")
-        print("\nRespuesta completa: ", gpt_response)
-        return jsonify(predicted_clasfinal=predicted_clasfinal, predicted_tip_cas=predicted_tip_cas, gpt_response=gpt_response)
+            # Emit the partial response to the client
+            socketio.emit('chunk', {'data': partial_response})
+
+        # Emit the final response to the client
+        socketio.emit('response', {'predicted_clasfinal': predicted_clasfinal, 'predicted_tip_cas': predicted_tip_cas, 'gpt_response': gpt_response})
 
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)
