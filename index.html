@@ -7,39 +7,61 @@
     <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" crossorigin="anonymous"></script>
 
     <script>
-        var socket = io();
+        // Initiate the connection
+        const socket = io();
+      
         $(document).ready(function() {
-            $("#predictionForm").on('submit', function(event) {
-                event.preventDefault();
-                $.ajax({
-                    url: '/',
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: function(data) {
-                        // This function will not be called since we're using WebSockets
-                    }
-                });
-        
-                // Clear the aianswer field before receiving new chunks
-                $("#aianswer").empty();
+          $("#predictionForm").submit(function(event) {
+            event.preventDefault();
+      
+            // Let the AI muse on the data...
+            $("#aianswer").empty().append("<p>Processing your request...</p>");
+      
+            $.ajax({
+              url: "/",
+              method: "POST",
+              data: $(this).serialize(),
+              success: function() {
+                // Hush, the magic is happening in the background
+              }
             });
-        
+      
+            // Prepare the canvas for the AI's masterpiece
             $("#classified-answer").empty();
             $("#aianswer").empty();
-        
-            socket.on('chunk', function(data) {
-                $("#classified-answer").text("Predicted tip_cas: " + data.predicted_tip_cas + ", Predicted clas_final: " + data.predicted_clasfinal);
-                $("#aianswer").append(data.data); // Append the new data to the existing content
-            });
-        
-            socket.on('response', function(data) {
-                $("#aianswer").empty();
-                $("#classified-answer").empty();
-                $("#classified-answer").text("Predicted tip_cas: " + data.predicted_tip_cas + ", Predicted clas_final: " + data.predicted_clasfinal);
-                $("#aianswer").append(data.gpt_response);
-            });
+          });
+      
+          socket.on("chunk", function(data) {
+            const { predicted_tip_cas, predicted_clasfinal } = data;
+            // Corrected to use template literals for dynamic text
+            $("#classified-answer").text(`Predicted tip_cas: ${predicted_tip_cas}, Predicted clas_final: ${predicted_clasfinal}`);
+          });
+      
+          socket.on("response", function(data) {
+            $("#classified-answer").empty();
+            $("#aianswer").empty();
+      
+            const { predicted_tip_cas, predicted_clasfinal, gpt_response } = data;
+            // Corrected to use template literals for dynamic text
+            $("#classified-answer").text(`Predicted tip_cas: ${predicted_tip_cas}, Predicted clas_final: ${predicted_clasfinal}`);
+      
+            // The AI unveils its creation, word by word...
+            let responseChunks = gpt_response.split(" ");
+            let displayedText = "";
+      
+            const revealResponse = () => {
+              if (responseChunks.length > 0) {
+                displayedText += responseChunks.shift() + " ";
+                $("#aianswer").text(displayedText);
+                setTimeout(revealResponse, 60); // Adjust speed for dramatic effect
+              }
+            };
+      
+            revealResponse();
+          });
         });
-        </script>
+      </script>
+      
 </head>
 <body class="bg-gray-100 flex items-center justify-center h-screen">
     <div class="flex">
