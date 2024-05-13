@@ -11,9 +11,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       // Initiate the connection
-      // Initiate the connection
       const socket = io();
-
+    
       $(document).ready(function () {
         $("#predictionForm").submit(function (event) {
           event.preventDefault();
@@ -30,8 +29,11 @@
           // Prepare the canvas for the AI's masterpiece
           $("#classified-answer").empty();
           $("#aianswer").empty();
+    
+          // Reset aiResponse to an empty string
+          aiResponse = "";
         });
-
+    
         socket.on("classified_answer", function (data) {
           const { predicted_conducta, predicted_clasfinal } = data;
           // Display the classified answer immediately
@@ -39,7 +41,7 @@
             `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
           );
         });
-
+    
         let aiResponse = "";
         socket.on("ai_response", function (data) {
           const { data: chunk } = data;
@@ -47,21 +49,8 @@
           // Append the partial AI response to the existing text
           $("#aianswer").text(aiResponse);
         });
-
-        socket.on("final_ai_response", function (data) {
-          const { gpt_response } = data;
-          // The AI unveils its creation, word by word...
-          let responseChunks = gpt_response.split(" ");
-          let displayedText = "";
-          const revealResponse = () => {
-            if (responseChunks.length > 0) {
-              displayedText += responseChunks.shift() + " ";
-              $("#aianswer").text(displayedText);
-              setTimeout(revealResponse, 40); // Adjust speed for dramatic effect
-            }
-          };
-          revealResponse();
-        });
+    
+   
       });
     </script>
   </head>
