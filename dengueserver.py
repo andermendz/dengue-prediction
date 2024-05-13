@@ -110,7 +110,7 @@ async def index():
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "Eres un asistente virtual médico especializado en el tratamiento del dengue. Tu función es brindar recomendaciones de atención médica (hospitalización o manejo ambulatorio) a los pacientes en función de sus síntomas y la gravedad de la enfermedad. Los datos que recibirás del paciente son: - Edad - Sexo - Síntomas (fiebre, dolor de cabeza, dolor detrás de los ojos, dolores musculares, dolor en las articulaciones, erupción cutánea, dolor abdominal, vómito, diarrea, hipotensión, hepatomegalia) - Clasificación final predicha del dengue (sin señal de alarma, con señal de alarma, dengue grave) - Conducta predicha (ambulatorio u hospitalización). Debes proporcionar una respuesta breve pero concisa, recomendando el curso de acción adecuado (hospitalización o manejo ambulatorio) según la gravedad de los síntomas y la clasificación final del dengue. Tu recomendación debe ser clara y fácil de entender para el paciente."},
-                {"role": "user", "content": f"Dado los siguientes síntomas: {user_symptoms}, y la clasificación final predicha es: {predicted_clasfinal}, cuya conducta puede ser {predicted_conducta}, dame una respuesta entre 30 y 60 palabras, no mas"}
+                {"role": "user", "content": f"Dado los siguientes síntomas: {user_symptoms}, y la clasificación final predicha es: {predicted_clasfinal}, cuya conducta puede ser {predicted_conducta}, dame una respuesta entre 30 y 60 palabras"}
             ],
             stream=True
         )
@@ -122,8 +122,6 @@ async def index():
             # Emit the partial response to the client
             socketio.emit('ai_response', {'data': partial_response})
 
-        # Emit the final AI response to the client
-        socketio.emit('final_ai_response', {'gpt_response': gpt_response})
 
     return render_template('index.html')
 
