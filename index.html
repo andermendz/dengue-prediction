@@ -10,161 +10,266 @@
     ></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Initiate the connection
-        const socket = io();
-  
-        $(document).ready(function () {
-          $("#predictionForm").submit(function (event) {
-            event.preventDefault();
-  
-            // Let the AI muse on the data...
-            $("#aianswer").empty().append("<p>Processing your request...</p>");
-  
-            $.ajax({
-              url: "/",
-              method: "POST",
-              data: $(this).serialize(),
-              success: function () {
-                // Hush, the magic is happening in the background
-              },
-            });
-  
-            // Prepare the canvas for the AI's masterpiece
-            $("#classified-answer").empty();
-            $("#aianswer").empty();
-          });
-  
-          socket.on("classified_answer", function (data) {
-            const { predicted_conducta, predicted_clasfinal } = data;
-            // Display the classified answer immediately
-            $("#classified-answer").text(
-              `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
-            );
-          });
-  
-          socket.on("ai_response", function (data) {
-            const { data: chunk } = data;
-            // Append the partial AI response to the existing text
-            $("#aianswer").append(chunk);
-          });
-  
-          socket.on("final_ai_response", function (data) {
-            const { gpt_response } = data;
-            // The AI unveils its creation, word by word...
-            let responseChunks = gpt_response.split(" ");
-            let displayedText = "";
-  
-            const revealResponse = () => {
-              if (responseChunks.length > 0) {
-                displayedText += responseChunks.shift() + " ";
-                $("#aianswer").text(displayedText);
-                setTimeout(revealResponse, 60); // Adjust speed for dramatic effect
-              }
-            };
-  
-            revealResponse();
-          });
-        });
-      </script>
-  </head>
+      // Initiate the connection
+      // Initiate the connection
+      const socket = io();
 
+      $(document).ready(function () {
+        $("#predictionForm").submit(function (event) {
+          event.preventDefault();
+          // Let the AI muse on the data...
+          $("#aianswer").empty().append("<p>Processing your request...</p>");
+          $.ajax({
+            url: "/",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function () {
+              // Hush, the magic is happening in the background
+            },
+          });
+          // Prepare the canvas for the AI's masterpiece
+          $("#classified-answer").empty();
+          $("#aianswer").empty();
+        });
+
+        socket.on("classified_answer", function (data) {
+          const { predicted_conducta, predicted_clasfinal } = data;
+          // Display the classified answer immediately
+          $("#classified-answer").text(
+            `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
+          );
+        });
+
+        let aiResponse = "";
+        socket.on("ai_response", function (data) {
+          const { data: chunk } = data;
+          aiResponse += chunk;
+          // Append the partial AI response to the existing text
+          $("#aianswer").text(aiResponse);
+        });
+
+        socket.on("final_ai_response", function (data) {
+          const { gpt_response } = data;
+          // The AI unveils its creation, word by word...
+          let responseChunks = gpt_response.split(" ");
+          let displayedText = "";
+          const revealResponse = () => {
+            if (responseChunks.length > 0) {
+              displayedText += responseChunks.shift() + " ";
+              $("#aianswer").text(displayedText);
+              setTimeout(revealResponse, 40); // Adjust speed for dramatic effect
+            }
+          };
+          revealResponse();
+        });
+      });
+    </script>
+  </head>
 
   <body>
     <div class="px-8 py-24 mx-auto md:px-12 lg:px-32 max-w-7xl">
       <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-24">
         <div class="p-2 border bg-gray-50 rounded-3xl">
           <div class="p-10 bg-white border shadow-lg rounded-2xl">
-            <div>
-            
-            </div>
+            <div></div>
             <form id="predictionForm">
-                <div class="mb-4">
-                  <label class="block text-gray-700 font-bold mb-2" for="edad">Edad:</label>
-                  <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="number" id="edad" name="edad" min="1" max="99" />
+              <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="edad"
+                  >Edad:</label
+                >
+                <input
+                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  type="number"
+                  id="edad"
+                  name="edad"
+                  min="1"
+                  max="99"
+                />
+              </div>
+              <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2" for="sexo"
+                  >Sexo:</label
+                >
+                <select
+                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  id="sexo"
+                  name="sexo"
+                >
+                  <option value="M">Masculino</option>
+                  <option value="F">Femenino</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label class="block text-gray-700 font-bold mb-2"
+                  >Síntomas:</label
+                >
+                <div class="flex items-center mb-2">
+                  <input
+                    id="fiebre"
+                    type="checkbox"
+                    name="fiebre"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="fiebre" class="ml-2 text-gray-700">Fiebre</label>
                 </div>
-                <div class="mb-4">
-                  <label class="block text-gray-700 font-bold mb-2" for="sexo">Sexo:</label>
-                  <select class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="sexo" name="sexo">
-                    <option value="M">M</option>
-                    <option value="F">F</option>
-                  </select>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="cefalea"
+                    type="checkbox"
+                    name="cefalea"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="cefalea" class="ml-2 text-gray-700"
+                    >Dolor de cabeza</label
+                  >
                 </div>
-                <div class="mb-4">
-                  <label class="block text-gray-700 font-bold mb-2">Síntomas:</label>
-                  <div class="flex items-center mb-2">
-                    <input id="fiebre" type="checkbox" name="fiebre" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="fiebre" class="ml-2 text-gray-700">Fiebre</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="cefalea" type="checkbox" name="cefalea" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="cefalea" class="ml-2 text-gray-700">Dolor de cabeza</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="dolrretroo" type="checkbox" name="dolrretroo" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="dolrretroo" class="ml-2 text-gray-700">Dolor detrás de los ojos</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="malgias" type="checkbox" name="malgias" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="malgias" class="ml-2 text-gray-700">Dolores musculares</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="artralgia" type="checkbox" name="artralgia" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="artralgia" class="ml-2 text-gray-700">Dolor en las articulaciones</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="erupcionr" type="checkbox" name="erupcionr" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="erupcionr" class="ml-2 text-gray-700">Erupción cutánea</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="dolor_abdo" type="checkbox" name="dolor_abdo" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="dolor_abdo" class="ml-2 text-gray-700">Dolor abdominal</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="vomito" type="checkbox" name="vomito" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="vomito" class="ml-2 text-gray-700">Vomito</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="dirrea" type="checkbox" name="dirrea" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="dirrea" class="ml-2 text-gray-700">Diarrea</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="hipotensio" type="checkbox" name="hipotensio" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="hipotensio" class="ml-2 text-gray-700">Hipotension</label>
-                  </div>
-                  <div class="flex items-center mb-2">
-                    <input id="hepatomeg" type="checkbox" name="hepatomeg" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
-                    <label for="hepatomeg" class="ml-2 text-gray-700">Hepatomegalia</label>
-                  </div>
-                  </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="dolrretroo"
+                    type="checkbox"
+                    name="dolrretroo"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="dolrretroo" class="ml-2 text-gray-700"
+                    >Dolor detrás de los ojos</label
+                  >
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="malgias"
+                    type="checkbox"
+                    name="malgias"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="malgias" class="ml-2 text-gray-700"
+                    >Dolores musculares</label
+                  >
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="artralgia"
+                    type="checkbox"
+                    name="artralgia"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="artralgia" class="ml-2 text-gray-700"
+                    >Dolor en las articulaciones</label
+                  >
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="erupcionr"
+                    type="checkbox"
+                    name="erupcionr"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="erupcionr" class="ml-2 text-gray-700"
+                    >Erupción cutánea</label
+                  >
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="dolor_abdo"
+                    type="checkbox"
+                    name="dolor_abdo"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="dolor_abdo" class="ml-2 text-gray-700"
+                    >Dolor abdominal</label
+                  >
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="vomito"
+                    type="checkbox"
+                    name="vomito"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="vomito" class="ml-2 text-gray-700">Vomito</label>
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="dirrea"
+                    type="checkbox"
+                    name="dirrea"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="dirrea" class="ml-2 text-gray-700">Diarrea</label>
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="hipotensio"
+                    type="checkbox"
+                    name="hipotensio"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="hipotensio" class="ml-2 text-gray-700"
+                    >Hipotension</label
+                  >
+                </div>
+                <div class="flex items-center mb-2">
+                  <input
+                    id="hepatomeg"
+                    type="checkbox"
+                    name="hepatomeg"
+                    value="1"
+                    class="form-checkbox h-5 w-5 text-gray-600"
+                  />
+                  <label for="hepatomeg" class="ml-2 text-gray-700"
+                    >Hepatomegalia</label
+                  >
+                </div>
+              </div>
 
-                  <div class="space-y-3">
-            
-                    <div class="col-span-full">
-                        <button type="submit" value="Submit" class="inline-flex items-center justify-center w-full h-12 gap-3 px-5 py-3 font-medium duration-200 bg-gray-100 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" type="button" aria-label="Sign in with Google">
-                            <ion-icon name="logo-google" role="img" class="md hydrated" aria-label="logo google"></ion-icon>
-                            <span>Send</span>
-                          </button>
-                    </div>
-                  </div>
+              <div class="space-y-3">
+                <div class="col-span-full">
+                  <button
+                    type="submit"
+                    value="Submit"
+                    class="inline-flex items-center justify-center w-full h-12 gap-3 px-5 py-3 font-medium duration-200 bg-gray-100 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    type="button"
+                    aria-label="Sign in with Google"
+                  >
+                    <ion-icon
+                      name="logo-google"
+                      role="img"
+                      class="md hydrated"
+                      aria-label="logo google"
+                    ></ion-icon>
+                    <span>Send</span>
+                  </button>
+                </div>
+              </div>
             </form>
-           
-           
-          
           </div>
         </div>
 
         <div class="flex flex-col">
-          <h1 id="classified-answer" class="text-4xl font-semibold tracking-tighter text-gray-900 lg:text-5xl">
+          <h1
+            id="classified-answer"
+            class="text-4xl font-semibold tracking-tighter text-gray-900 lg:text-5xl"
+          >
             Detecta la gravedad del paciente,
             <span class="text-gray-600">a partir de los sintomas</span>
           </h1>
-          <p id="aianswer" class="mt-4 text-base font-medium text-gray-500 text-pretty">
+          <p
+            id="aianswer"
+            class="mt-4 text-base font-medium text-gray-500 text-pretty"
+          >
             Utilizando Inteligencia Artificial Generativa
           </p>
         </div>
       </div>
     </div>
   </body>
-
-
 </html>
