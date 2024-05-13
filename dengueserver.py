@@ -99,11 +99,12 @@ async def index():
         predicted_clasfinal = model_clasfinal.predict([user_data])[0]
         predicted_conducta = model_conducta.predict([user_data])[0]
 
-        # Decode the predictions
         predicted_clasfinal = label_encoders['clasfinal'].inverse_transform([predicted_clasfinal])[0]
         predicted_conducta = label_encoders['conducta'].inverse_transform([predicted_conducta])[0]
 
-        # Make the OpenAI API call
+        # Emit the classified answer to the client
+        socketio.emit('classified_answer', {'predicted_clasfinal': predicted_clasfinal, 'predicted_conducta': predicted_conducta})
+
         user_symptoms = f"Edad: {def_clas_edad}, Sexo: {sexo}, Fiebre: {fiebre}, Dolor de cabeza: {cefalea}, Dolor detrás de los ojos: {dolrretroo}, Dolores musculares: {malgias}, Dolor en las articulaciones: {artralgia}, Erupción cutánea: {erupcionr}, Dolor abdominal: {dolor_abdo}, Vómito: {vomito}, Diarrea: {diarrea}, Hipotensión: {hipotensio}, Hepatomegalia: {hepatomeg}"
         stream = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -117,14 +118,16 @@ async def index():
         gpt_response = ""
         async for chunk in stream:
             partial_response = chunk.choices[0].delta.content or ""
-            gpt_response += chunk.choices[0].delta.content or ""
+            gpt_response += partial_response
             # Emit the partial response to the client
-            socketio.emit('chunk', {'data': partial_response})
+            socketio.emit('ai_response', {'data': partial_response})
 
-        # Emit the final response to the client
-        socketio.emit('response', {'predicted_clasfinal': predicted_clasfinal, 'predicted_conducta': predicted_conducta, 'gpt_response': gpt_response})
+        # Emit the final AI response to the client
+        socketio.emit('final_ai_response', {'gpt_response': gpt_response})
 
     return render_template('index.html')
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
+
+

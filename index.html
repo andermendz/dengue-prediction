@@ -10,65 +10,62 @@
     ></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Initiate the connection
-      const socket = io();
-
-      $(document).ready(function () {
-        $("#predictionForm").submit(function (event) {
-          event.preventDefault();
-
-          // Let the AI muse on the data...
-          $("#aianswer").empty().append("<p>Processing your request...</p>");
-
-          $.ajax({
-            url: "/",
-            method: "POST",
-            data: $(this).serialize(),
-            success: function () {
-              // Hush, the magic is happening in the background
-            },
+        // Initiate the connection
+        const socket = io();
+  
+        $(document).ready(function () {
+          $("#predictionForm").submit(function (event) {
+            event.preventDefault();
+  
+            // Let the AI muse on the data...
+            $("#aianswer").empty().append("<p>Processing your request...</p>");
+  
+            $.ajax({
+              url: "/",
+              method: "POST",
+              data: $(this).serialize(),
+              success: function () {
+                // Hush, the magic is happening in the background
+              },
+            });
+  
+            // Prepare the canvas for the AI's masterpiece
+            $("#classified-answer").empty();
+            $("#aianswer").empty();
           });
-
-          // Prepare the canvas for the AI's masterpiece
-          $("#classified-answer").empty();
-          $("#aianswer").empty();
+  
+          socket.on("classified_answer", function (data) {
+            const { predicted_conducta, predicted_clasfinal } = data;
+            // Display the classified answer immediately
+            $("#classified-answer").text(
+              `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
+            );
+          });
+  
+          socket.on("ai_response", function (data) {
+            const { data: chunk } = data;
+            // Append the partial AI response to the existing text
+            $("#aianswer").append(chunk);
+          });
+  
+          socket.on("final_ai_response", function (data) {
+            const { gpt_response } = data;
+            // The AI unveils its creation, word by word...
+            let responseChunks = gpt_response.split(" ");
+            let displayedText = "";
+  
+            const revealResponse = () => {
+              if (responseChunks.length > 0) {
+                displayedText += responseChunks.shift() + " ";
+                $("#aianswer").text(displayedText);
+                setTimeout(revealResponse, 60); // Adjust speed for dramatic effect
+              }
+            };
+  
+            revealResponse();
+          });
         });
-
-        socket.on("chunk", function (data) {
-          const { predicted_conducta, predicted_clasfinal } = data;
-          // Corrected to use template literals for dynamic text
-          $("#classified-answer").text(
-            `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
-          );
-        });
-
-        socket.on("response", function (data) {
-          $("#classified-answer").empty();
-          $("#aianswer").empty();
-
-          const { predicted_conducta, predicted_clasfinal, gpt_response } =
-            data;
-          // Corrected to use template literals for dynamic text
-          $("#classified-answer").text(
-            `Estamos ante un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
-          );
-
-          // The AI unveils its creation, word by word...
-          let responseChunks = gpt_response.split(" ");
-          let displayedText = "";
-
-          const revealResponse = () => {
-            if (responseChunks.length > 0) {
-              displayedText += responseChunks.shift() + " ";
-              $("#aianswer").text(displayedText);
-              setTimeout(revealResponse, 60); // Adjust speed for dramatic effect
-            }
-          };
-
-          revealResponse();
-        });
-      });
-    </script>
+      </script>
   </head>
 
 
