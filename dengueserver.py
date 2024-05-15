@@ -12,8 +12,11 @@ app = Flask(__name__, template_folder='.')
 socketio = SocketIO(app)
 client = AsyncClient()
 
+# Diccionario para almacenar los codificadores de etiquetas
+label_encoders = {}
+
+# Función para categorizar la edad
 def categorize_age(edad):
-    """Categorize the numerical age into predefined age groups."""
     if edad < 2:
         return 'PRIMERA INFANCIA'
     elif edad < 12:
@@ -27,21 +30,56 @@ def categorize_age(edad):
     else:
         return 'PERSONA MAYOR'
 
+# Preprocesamiento y entrenamiento del modelo (UNA SOLA VEZ)
+data = pd.read_csv('dengue2.csv')
 
+# Convertir 'Si'/'No' a 1/0 y 'sexo' a 0/1
+yes_no_columns = ['fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
+for col in yes_no_columns:
+    data[col] = data[col].map({1: 1, 0: 0})
+data['sexo'] = data['sexo'].map({'M': 0, 'F': 1})
+
+# Codificar otras variables categóricas
+label_columns = ['clasfinal', 'conducta', 'def_clas_edad']  # Incluir def_clas_edad
+for col in label_columns:
+    le = LabelEncoder()
+    if col == 'def_clas_edad':
+        # Codificar def_clas_edad con todas las categorías posibles
+        all_possible_categories = np.array(['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR'])
+        le.fit(all_possible_categories)
+    else:
+        le.fit(data[col])
+    data[col] = le.transform(data[col])
+    label_encoders[col] = le
+
+# Definir características
+features = ['def_clas_edad', 'sexo', 'fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
+
+# Dividir datos
+X = data[features].values
+y_clasfinal = data['clasfinal']
+y_conducta = data['conducta']
+X_train, X_test, y_train, y_test = train_test_split(X, np.column_stack((y_clasfinal, y_conducta)), test_size=0.2, random_state=42)
+y_clasfinal_train, y_conducta_train = y_train[:, 0], y_train[:, 1]
+
+# Entrenar modelos
+model_clasfinal = RandomForestClassifier(n_estimators=100, random_state=42)
+model_conducta = RandomForestClassifier(n_estimators=100, random_state=42)
+model_clasfinal.fit(X_train, y_clasfinal_train)
+model_conducta.fit(X_train, y_conducta_train)
+
+# Manejar conexión del cliente
 @socketio.on('connect')
 def handle_connect():
     print('Client connected')
 
+# Ruta principal
 @app.route('/', methods=['GET', 'POST'])
 async def index():
     if request.method == 'POST':
-        # Get data from form
+        # Obtener datos del formulario
         edad = int(request.form.get('edad'))
-        # Translate numerical age to category and encode
-        def_clas_edad = categorize_age(edad)
-        
         sexo = request.form.get('sexo')
-        # Convert 'sexo' to 'Masculino' or 'Femenino'
         sexo = 'Masculino' if sexo == 'M' else 'Femenino'
         fiebre = 'Sí' if request.form.get('fiebre', 0) == '1' else 'No'
         cefalea = 'Sí' if request.form.get('cefalea', 0) == '1' else 'No'
@@ -55,57 +93,20 @@ async def index():
         hipotensio = 'Sí' if request.form.get('hipotensio', 0) == '1' else 'No'
         hepatomeg = 'Sí' if request.form.get('hepatomeg', 0) == '1' else 'No'
 
-        # Load the dataset and preprocess data
-        data = pd.read_csv('dengue2.csv')
-        # Convert categorical 'Si'/'No' to 1/0 and 'sexo' to 0/1
-        yes_no_columns = ['fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
-        for col in yes_no_columns:
-            data[col] = data[col].map({1: 1, 0: 0})
-        data['sexo'] = data['sexo'].map({'M': 0, 'F': 1})
-        # Encoding other categorical variables using LabelEncoder
-        label_columns = ['clasfinal', 'conducta']
-        label_encoders = {}
-        for col in label_columns:
-            le = LabelEncoder()
-            data[col] = le.fit_transform(data[col])
-            label_encoders[col] = le
+        # Preparar datos del usuario
+        user_data = [label_encoders['def_clas_edad'].transform([categorize_age(edad)])[0]] + [1 if sexo == 'Masculino' else 0, 1 if fiebre == 'Sí' else 0, 1 if cefalea == 'Sí' else 0, 1 if dolrretroo == 'Sí' else 0, 1 if malgias == 'Sí' else 0, 1 if artralgia == 'Sí' else 0, 1 if erupcionr == 'Sí' else 0, 1 if dolor_abdo == 'Sí' else 0, 1 if vomito == 'Sí' else 0, 1 if diarrea == 'Sí' else 0, 1 if hipotensio == 'Sí' else 0, 1 if hepatomeg == 'Sí' else 0]
 
-        # Define features including 'def_clas_edad'
-        features = ['def_clas_edad', 'sexo', 'fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
-        
-        le_def_clas_edad = LabelEncoder()
-        all_possible_categories = np.array(['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR'])  # All categories that `categorize_age` can produce
-        le_def_clas_edad.fit(all_possible_categories)
-        data['def_clas_edad'] = le_def_clas_edad.transform(data['def_clas_edad'])
-
-        # Split data
-        X = data[features].values
-        y_clasfinal = data['clasfinal']
-        y_conducta = data['conducta']
-        
-        X_train, X_test, y_train, y_test = train_test_split(X, np.column_stack((y_clasfinal, y_conducta)), test_size=0.2, random_state=42)
-        y_clasfinal_train, y_conducta_train = y_train[:, 0], y_train[:, 1]
-
-        # Select and train the model
-        model_clasfinal = RandomForestClassifier(n_estimators=100, random_state=42)
-        model_conducta = RandomForestClassifier(n_estimators=100, random_state=42)
-        model_clasfinal.fit(X_train, y_clasfinal_train)
-        model_conducta.fit(X_train, y_conducta_train)
-
-        # Prepare user data including 'def_clas_edad'
-        user_data = [le_def_clas_edad.transform([categorize_age(edad)])[0]] + [1 if sexo == 'Masculino' else 0, 1 if fiebre == 'Sí' else 0, 1 if cefalea == 'Sí' else 0, 1 if dolrretroo == 'Sí' else 0, 1 if malgias == 'Sí' else 0, 1 if artralgia == 'Sí' else 0, 1 if erupcionr == 'Sí' else 0, 1 if dolor_abdo == 'Sí' else 0, 1 if vomito == 'Sí' else 0, 1 if diarrea == 'Sí' else 0, 1 if hipotensio == 'Sí' else 0, 1 if hepatomeg == 'Sí' else 0]
-
-        # Make predictions
+        # Predicciones
         predicted_clasfinal = model_clasfinal.predict([user_data])[0]
         predicted_conducta = model_conducta.predict([user_data])[0]
 
+        # Decodificar y emitir predicciones
         predicted_clasfinal = label_encoders['clasfinal'].inverse_transform([predicted_clasfinal])[0]
         predicted_conducta = label_encoders['conducta'].inverse_transform([predicted_conducta])[0]
-
-        # Emit the classified answer to the client
         socketio.emit('classified_answer', {'predicted_clasfinal': predicted_clasfinal, 'predicted_conducta': predicted_conducta})
 
-        user_symptoms = f"Edad: {def_clas_edad}, Sexo: {sexo}, Fiebre: {fiebre}, Dolor de cabeza: {cefalea}, Dolor detrás de los ojos: {dolrretroo}, Dolores musculares: {malgias}, Dolor en las articulaciones: {artralgia}, Erupción cutánea: {erupcionr}, Dolor abdominal: {dolor_abdo}, Vómito: {vomito}, Diarrea: {diarrea}, Hipotensión: {hipotensio}, Hepatomegalia: {hepatomeg}"
+        # Solicitud a GPT-4
+        user_symptoms = f"Edad: {categorize_age(edad)}, Sexo: {sexo}, Fiebre: {fiebre}, Dolor de cabeza: {cefalea}, Dolor detrás de los ojos: {dolrretroo}, Dolores musculares: {malgias}, Dolor en las articulaciones: {artralgia}, Erupción cutánea: {erupcionr}, Dolor abdominal: {dolor_abdo}, Vómito: {vomito}, Diarrea: {diarrea}, Hipotensión: {hipotensio}, Hepatomegalia: {hepatomeg}"
         stream = client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -119,13 +120,9 @@ async def index():
         async for chunk in stream:
             partial_response = chunk.choices[0].delta.content or ""
             gpt_response += partial_response
-            # Emit the partial response to the client
             socketio.emit('ai_response', {'data': partial_response})
-
 
     return render_template('index.html')
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
-
-
