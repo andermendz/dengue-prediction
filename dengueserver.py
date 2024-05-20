@@ -7,11 +7,6 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 from g4f.client import AsyncClient
 import asyncio
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from sklearn.tree import export_graphviz
-from sklearn import tree
 
 app = Flask(__name__, template_folder='.')
 socketio = SocketIO(app)
@@ -22,18 +17,18 @@ label_encoders = {}
 
 # Función para categorizar la edad
 def categorize_age(edad):
-  if edad < 2:
-    return 'PRIMERA INFANCIA'
-  elif edad < 12:
-    return 'INFANCIA'
-  elif edad < 18:
-    return 'ADOLESCENCIA'
-  elif edad < 30:
-    return 'JOVENES'
-  elif edad < 60:
-    return 'ADULTEZ'
-  else:
-    return 'PERSONA MAYOR'
+    if edad < 2:
+        return 'PRIMERA INFANCIA'
+    elif edad < 12:
+        return 'INFANCIA'
+    elif edad < 18:
+        return 'ADOLESCENCIA'
+    elif edad < 30:
+        return 'JOVENES'
+    elif edad < 60:
+        return 'ADULTEZ'
+    else:
+        return 'PERSONA MAYOR'
 
 # Preprocesamiento y entrenamiento del modelo (UNA SOLA VEZ)
 data = pd.read_csv('dengue2.csv')
@@ -41,21 +36,21 @@ data = pd.read_csv('dengue2.csv')
 # Convertir 'Si'/'No' a 1/0 y 'sexo' a 0/1
 yes_no_columns = ['fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
 for col in yes_no_columns:
-  data[col] = data[col].map({1: 1, 0: 0})
+    data[col] = data[col].map({1: 1, 0: 0})
 data['sexo'] = data['sexo'].map({'M': 0, 'F': 1})
 
 # Codificar otras variables categóricas
-label_columns = ['clasfinal', 'conducta', 'def_clas_edad'] # Incluir def_clas_edad
+label_columns = ['clasfinal', 'conducta', 'def_clas_edad']  # Incluir def_clas_edad
 for col in label_columns:
-  le = LabelEncoder()
-  if col == 'def_clas_edad':
-    # Codificar def_clas_edad con todas las categorías posibles
-    all_possible_categories = np.array(['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR'])
-    le.fit(all_possible_categories)
-  else:
-    le.fit(data[col])
-  data[col] = le.transform(data[col])
-  label_encoders[col] = le
+    le = LabelEncoder()
+    if col == 'def_clas_edad':
+        # Codificar def_clas_edad con todas las categorías posibles
+        all_possible_categories = np.array(['PRIMERA INFANCIA', 'INFANCIA', 'ADOLESCENCIA', 'JOVENES', 'ADULTEZ', 'PERSONA MAYOR'])
+        le.fit(all_possible_categories)
+    else:
+        le.fit(data[col])
+    data[col] = le.transform(data[col])
+    label_encoders[col] = le
 
 # Definir características
 features = ['def_clas_edad', 'sexo', 'fiebre', 'cefalea', 'dolrretroo', 'malgias', 'artralgia', 'erupcionr', 'dolor_abdo', 'vomito', 'diarrea', 'hipotensio', 'hepatomeg']
@@ -73,29 +68,10 @@ model_conducta = RandomForestClassifier(n_estimators=100, random_state=42)
 model_clasfinal.fit(X_train, y_clasfinal_train)
 model_conducta.fit(X_train, y_conducta_train)
 
-# Crear un árbol de decisión para la clasificación final
-clf_tree = tree.DecisionTreeClassifier()
-clf_tree = clf_tree.fit(X_train, y_clasfinal_train)
-
-# Visualizar el árbol de decisión
-fig, ax = plt.subplots(figsize=(15,10))
-tree.plot_tree(clf_tree, filled=True)
-fig.savefig('tree_clasfinal.png', dpi=600, bbox_inches='tight')
-
-# Crear un árbol de decisión para la conducta
-clf_tree = tree.DecisionTreeClassifier()
-clf_tree = clf_tree.fit(X_train, y_conducta_train)
-
-# Visualizar el árbol de decisión
-fig, ax = plt.subplots(figsize=(15,10))
-tree.plot_tree(clf_tree, filled=True)
-fig.savefig('tree_conducta.png', dpi=600, bbox_inches='tight')
-
 # Manejar conexión del cliente
 @socketio.on('connect')
 def handle_connect():
-  print('Client connected')
-
+    print('Client connected')
 
 # Ruta principal
 @app.route('/', methods=['GET', 'POST'])
