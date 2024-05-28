@@ -12,50 +12,56 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 
-  <script>
-    // Initiate the connection
-    const socket = io();
-
-    $(document).ready(function () {
-      $("#predictionForm").submit(function (event) {
-        event.preventDefault();
-        // Let the AI muse on the data...
-        $("#aianswer").empty().append("<p>Processing your request...</p>");
-        $.ajax({
-          url: "/",
-          method: "POST",
-          data: $(this).serialize(),
-          success: function () {
-            // Hush, the magic is happening in the background
-          },
+    <script>
+      // Iniciar la conexión
+      const socket = io();
+    
+      $(document).ready(function () {
+        $("#predictionForm").submit(function (event) {
+          event.preventDefault();
+          // Mostrar mensaje de procesamiento
+          $("#aianswer").empty().append("<p>Procesando su solicitud...</p>");
+          $.ajax({
+            url: "/",
+            method: "POST",
+            data: $(this).serialize(),
+            success: function () {
+              // Aquí sucede la magia en el fondo
+            },
+          });
+          // Preparar el espacio para la respuesta del AI
+          $("#classified-answer").empty();
+          $("#aianswer").empty();
+    
+          // Reiniciar aiResponse a una cadena vacía
+          aiResponse = "";
         });
-        // Prepare the canvas for the AI's masterpiece
-        $("#classified-answer").empty();
-        $("#aianswer").empty();
-
-        // Reset aiResponse to an empty string
-        aiResponse = "";
+    
+        socket.on("classified_answer", function (data) {
+          const { predicted_conducta, predicted_clasfinal } = data;
+          // Mostrar la respuesta clasificada inmediatamente
+          $("#classified-answer").text(
+            `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
+          );
+        });
+    
+        let aiResponse = "";
+        socket.on("ai_response", function (data) {
+          const { data: chunk } = data;
+          aiResponse += chunk;
+    
+          // Reemplazar ** con etiquetas <strong>
+          const formattedResponse = aiResponse
+            .replace(/(?:\*\*)([^*]+)(?:\*\*)/g, "<strong>$1</strong>"); // Reemplazar todas las ocurrencias de ** en el texto
+    
+          // Añadir la respuesta parcial del AI al texto existente
+          $("#aianswer").html(formattedResponse); // Usar .html() en lugar de .text()
+        });
       });
+    </script>
+    
 
-      socket.on("classified_answer", function (data) {
-        const { predicted_conducta, predicted_clasfinal } = data;
-        // Display the classified answer immediately
-        $("#classified-answer").text(
-          `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
-        );
-      });
-
-      let aiResponse = "";
-      socket.on("ai_response", function (data) {
-        const { data: chunk } = data;
-        aiResponse += chunk;
-        // Append the partial AI response to the existing text
-        $("#aianswer").text(aiResponse);
-      });
-
-
-    });
-  </script>
+    
 </head>
 
 <body>
@@ -337,7 +343,7 @@
                     Detecta la gravedad del paciente,
                     <span class="text-gray-600">a partir de los sintomas</span>
                 </h1>
-                <p id="aianswer" class="mt-4 text-base font-medium text-gray-500 text-pretty">
+                <p id="aianswer" class="mt-4 text-base font-medium text-black text-pretty">
                     Utilizando Inteligencia Artificial Generativa
                 </p>
             </div>
