@@ -122,7 +122,7 @@
         <div class="grid grid-cols-2 mt-12 text-center gap-x-6 gap-y-12 lg:mt-16 lg:grid-cols-4 lg:gap-x-8 lg:gap-y-16">
           <div class>
             <div>
-         
+
               <span class="flex items-center justify-center mx-auto rounded-full size-14 bg-gray-100">
                 <img src="./static/sintomas/fiebre.png" alt="" srcset="">
               </span>
@@ -238,266 +238,141 @@
   </section>
 
 
-  <section>
-    <div class="px-8 py-12 mx-auto md:px-12 lg:px-32 max-w-7xl">
-      <div class="p-2 border bg-gray-50 rounded-3xl particle-container">
-        <div class="p-10 bg-white border shadow-lg md:p-20 rounded-3xl">
-          <div class="grid items-center grid-cols-1 lg:grid-cols-2">
-            <div>
-              <span class="text-sm font-semibold text-gray-500 uppercase">❖ windstatic</span>
-              <p class="mt-8 text-4xl font-semibold tracking-tighter text-black">Download our app today</p>
-              <p class="mt-4 text-base text-gray-500 text-balance">The fastest method for working together on staging
-                and temporary environments.</p>
-            </div>
-            <div class="flex justify-center lg:ml-auto">
-              <div class="relative">
-                <button
-                  class="inline-flex items-center justify-center w-full h-32 gap-3 px-5 py-3 bg-gray-100 rounded-xl hover:bg-gray-200 focus:outline-none particle-button">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="size-4" viewBox="0 0 512 512">
-                    <path
-                      d="M99.617 8.057a50.191 50.191 0 00-38.815-6.713l230.932 230.933 74.846-74.846L99.617 8.057zM32.139 20.116c-6.441 8.563-10.148 19.077-10.148 30.199v411.358c0 11.123 3.708 21.636 10.148 30.199l235.877-235.877L32.139 20.116zM464.261 212.087l-67.266-37.637-81.544 81.544 81.548 81.548 67.273-37.64c16.117-9.03 25.738-25.442 25.738-43.908s-9.621-34.877-25.749-43.907zM291.733 279.711L60.815 510.629c3.786.891 7.639 1.371 11.492 1.371a50.275 50.275 0 0027.31-8.07l266.965-149.372-74.849-74.847z">
-                    </path>
-                  </svg>
-                  <span class="text-xs text-gray-600">Download on Google Play</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-
-
-  <style>
-    .particle-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
-
-    .particle {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background-color: #cccccc;
-      border-radius: 50%;
-      transition: transform 0.4s ease, background-color 0.4s ease, opacity 0.4s ease;
-    }
-
-    @keyframes move {
-      0% {
-        transform: translate(0, 0);
-      }
-
-      25% {
-        transform: translate(var(--tx1), var(--ty1));
-      }
-
-      50% {
-        transform: translate(var(--tx2), var(--ty2));
-      }
-
-      75% {
-        transform: translate(var(--tx3), var(--ty3));
-      }
-
-      100% {
-        transform: translate(var(--tx4), var(--ty4));
-      }
-    }
-
-    .particle-button:hover .particle {
-      transform: translate(calc(var(--button-x) * 1px), calc(var(--button-y) * 1px)) scale(1);
-      background-color: #888888;
-      opacity: 1;
-    }
-
-    .particle-container .particle {
-      animation: move 8s infinite ease-in-out;
-    }
-  </style>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const container = document.querySelector('.particle-container');
-      const button = document.querySelector('.particle-button');
-      const numParticles = 600;
-
-      function randomOffset() {
-        const angle = Math.random() * 2 * Math.PI;
-        const distance = Math.random() * 100;
-        return {
-          x: Math.cos(angle) * distance,
-          y: Math.sin(angle) * distance
-        };
-      }
-
-      for (let i = 0; i < numParticles; i++) {
-        const particle = document.createElement('div');
-        particle.classList.add('particle');
-
-        const offset1 = randomOffset();
-        const offset2 = randomOffset();
-        const offset3 = randomOffset();
-        const offset4 = randomOffset();
-
-        particle.style.setProperty('--tx1', `${offset1.x}px`);
-        particle.style.setProperty('--ty1', `${offset1.y}px`);
-        particle.style.setProperty('--tx2', `${offset2.x}px`);
-        particle.style.setProperty('--ty2', `${offset2.y}px`);
-        particle.style.setProperty('--tx3', `${offset3.x}px`);
-        particle.style.setProperty('--ty3', `${offset3.y}px`);
-        particle.style.setProperty('--tx4', `${offset4.x}px`);
-        particle.style.setProperty('--ty4', `${offset4.y}px`);
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        container.appendChild(particle);
-      }
-
-      button.addEventListener('mouseenter', () => {
-        const buttonRect = button.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        const buttonCenterX = buttonRect.left + buttonRect.width / 2 - containerRect.left;
-        const buttonCenterY = buttonRect.top + buttonRect.height / 2 - containerRect.top;
-
-        container.querySelectorAll('.particle').forEach(particle => {
-          const particleRect = particle.getBoundingClientRect();
-          const particleCenterX = particleRect.left + particleRect.width / 2 - containerRect.left;
-          const particleCenterY = particleRect.top + particleRect.height / 2 - containerRect.top;
-
-          const buttonOffsetX = buttonCenterX - particleCenterX;
-          const buttonOffsetY = buttonCenterY - particleCenterY;
-
-          particle.style.setProperty('--button-x', `${buttonOffsetX}`);
-          particle.style.setProperty('--button-y', `${buttonOffsetY}`);
-          particle.style.transform = `translate(${buttonOffsetX}px, ${buttonOffsetY}px) scale(1)`;
-          particle.style.backgroundColor = '#888888';
-          particle.style.opacity = 1;
-        });
-      });
-
-      button.addEventListener('mouseleave', () => {
-        container.querySelectorAll('.particle').forEach(particle => {
-          particle.style.animation = `move 8s infinite ease-in-out`;
-          particle.style.backgroundColor = '#cccccc';
-          particle.style.opacity = 1;
-        });
-      });
-    });
-  </script>
-
-
-
-
-
-  <div class="px-8 py-24 mx-auto md:px-12 lg:px-32 max-w-7xl">
-    <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-24">
-      <div class="p-2 border bg-gray-50 rounded-3xl">
-        <div class="p-10 bg-white border shadow-lg rounded-2xl">
-          <div></div>
-          <form id="predictionForm">
-            <div class="mb-4">
-              <label class="block text-gray-700 font-bold mb-2" for="edad">Edad:</label>
-              <input
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                type="number" id="edad" name="edad" min="1" max="99" />
-            </div>
-            <div class="mb-4">
-              <label class="block text-gray-700 font-bold mb-2" for="sexo">Sexo:</label>
-              <select
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="sexo" name="sexo">
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
-              </select>
-            </div>
-            <div class="mb-4">
-              <label class="block text-gray-700 font-bold mb-2">Síntomas:</label>
-              <div class="flex items-center mb-2">
-                <input id="fiebre" type="checkbox" name="fiebre" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="fiebre" class="ml-2 text-gray-700">Fiebre</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="cefalea" type="checkbox" name="cefalea" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="cefalea" class="ml-2 text-gray-700">Dolor de cabeza</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="dolrretroo" type="checkbox" name="dolrretroo" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="dolrretroo" class="ml-2 text-gray-700">Dolor detrás de los ojos</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="malgias" type="checkbox" name="malgias" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="malgias" class="ml-2 text-gray-700">Dolores musculares</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="artralgia" type="checkbox" name="artralgia" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="artralgia" class="ml-2 text-gray-700">Dolor en las articulaciones</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="erupcionr" type="checkbox" name="erupcionr" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="erupcionr" class="ml-2 text-gray-700">Erupción cutánea</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="dolor_abdo" type="checkbox" name="dolor_abdo" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="dolor_abdo" class="ml-2 text-gray-700">Dolor abdominal</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="vomito" type="checkbox" name="vomito" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="vomito" class="ml-2 text-gray-700">Vomito</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="dirrea" type="checkbox" name="dirrea" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="dirrea" class="ml-2 text-gray-700">Diarrea</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="hipotensio" type="checkbox" name="hipotensio" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="hipotensio" class="ml-2 text-gray-700">Hipotension</label>
-              </div>
-              <div class="flex items-center mb-2">
-                <input id="hepatomeg" type="checkbox" name="hepatomeg" value="1"
-                  class="form-checkbox h-5 w-5 text-gray-600" />
-                <label for="hepatomeg" class="ml-2 text-gray-700">Hepatomegalia</label>
-              </div>
-            </div>
-
-            <div class="space-y-3">
-              <div class="col-span-full">
-                <button type="submit" value="Submit"
-                  class="inline-flex items-center justify-center w-full h-12 gap-3 px-5 py-3 font-medium duration-200 bg-gray-100 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  type="button" aria-label="Sign in with Google">
-                  <ion-icon name="logo-google" role="img" class="md hydrated" aria-label="logo google"></ion-icon>
-                  <span>Send</span>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="flex flex-col">
-        <h1 id="classified-answer" class="text-4xl font-semibold tracking-tighter text-gray-900 lg:text-5xl">
-          Detecta la gravedad del paciente,
-          <span class="text-gray-600">a partir de los sintomas</span>
+  <section >
+    <div class="flex items-center lg:col-span-2 flex-col text-center">
+        <h1 class="text-2xl font-semibold tracking-tighter text-gray-900 lg:text-3xl text-balance">
+            Los resultados proporcionados por este algoritmo predictivo sobre la gravedad del dengue son orientativos y no deben sustituir la consulta médica profesional.
         </h1>
-        <p id="aianswer" class="mt-4 text-base font-medium text-gray-500 text-pretty">
-          Utilizando Inteligencia Artificial Generativa
+        <p class="mt-4 text-base font-medium text-gray-500 text-balance">
+            Si tiene alguna preocupación o duda sobre su salud, por favor consulte a un médico
         </p>
-      </div>
     </div>
-  </div>
+    <div class="px-8 py-24 mx-auto md:px-12 lg:px-32 max-w-7xl">
+        <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-24">
+            <div class="p-2 border bg-gray-50 rounded-3xl">
+                <div class="p-10 bg-white border shadow-lg rounded-2xl">
+                    <div></div>
+                    <form id="predictionForm" onsubmit="return validateForm()">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-bold mb-2" for="edad">Edad:</label>
+                            <input
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                type="number" id="edad" name="edad" min="1" max="99" />
+                            <p id="edadError" class="text-red-500 text-xs italic hidden">Por favor, ingrese una edad válida entre 1 y 99.</p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-bold mb-2" for="sexo">Sexo:</label>
+                            <select
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                id="sexo" name="sexo">
+                             
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                            <p id="sexoError" class="text-red-500 text-xs italic hidden">Por favor, seleccione su sexo.</p>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 font-bold mb-2">Síntomas:</label>
+                            <div class="flex items-center mb-2">
+                                <input id="fiebre" type="checkbox" name="fiebre" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="fiebre" class="ml-2 text-gray-700">Fiebre</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="cefalea" type="checkbox" name="cefalea" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="cefalea" class="ml-2 text-gray-700">Dolor de cabeza</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="dolrretroo" type="checkbox" name="dolrretroo" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="dolrretroo" class="ml-2 text-gray-700">Dolor detrás de los ojos</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="malgias" type="checkbox" name="malgias" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="malgias" class="ml-2 text-gray-700">Dolores musculares</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="artralgia" type="checkbox" name="artralgia" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="artralgia" class="ml-2 text-gray-700">Dolor en las articulaciones</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="erupcionr" type="checkbox" name="erupcionr" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="erupcionr" class="ml-2 text-gray-700">Erupción cutánea</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="dolor_abdo" type="checkbox" name="dolor_abdo" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="dolor_abdo" class="ml-2 text-gray-700">Dolor abdominal</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="vomito" type="checkbox" name="vomito" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="vomito" class="ml-2 text-gray-700">Vomito</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="dirrea" type="checkbox" name="dirrea" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="dirrea" class="ml-2 text-gray-700">Diarrea</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="hipotensio" type="checkbox" name="hipotensio" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="hipotensio" class="ml-2 text-gray-700">Hipotension</label>
+                            </div>
+                            <div class="flex items-center mb-2">
+                                <input id="hepatomeg" type="checkbox" name="hepatomeg" value="1" class="form-checkbox h-5 w-5 text-gray-600" />
+                                <label for="hepatomeg" class="ml-2 text-gray-700">Hepatomegalia</label>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="col-span-full">
+                                <button type="submit"
+                                    class="inline-flex items-center justify-center w-full h-12 gap-3 px-5 py-3 font-medium duration-200 bg-gray-100 rounded-xl hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                    aria-label="Sign in with Google">
+                                    <ion-icon name="logo-google" role="img" class="md hydrated" aria-label="logo google"></ion-icon>
+                                    <span>Send</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="flex flex-col">
+                <h1 id="classified-answer" class="text-4xl font-semibold tracking-tighter text-gray-900 lg:text-5xl">
+                    Detecta la gravedad del paciente,
+                    <span class="text-gray-600">a partir de los sintomas</span>
+                </h1>
+                <p id="aianswer" class="mt-4 text-base font-medium text-gray-500 text-pretty">
+                    Utilizando Inteligencia Artificial Generativa
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function validateForm() {
+        let isValid = true;
+
+        const edad = document.getElementById("edad").value;
+        const sexo = document.getElementById("sexo").value;
+        const edadError = document.getElementById("edadError");
+        const sexoError = document.getElementById("sexoError");
+
+        if (!edad || edad < 1 || edad > 99) {
+            edadError.classList.remove("hidden");
+            isValid = false;
+        } else {
+            edadError.classList.add("hidden");
+        }
+
+        if (!sexo) {
+            sexoError.classList.remove("hidden");
+            isValid = false;
+        } else {
+            sexoError.classList.add("hidden");
+        }
+
+        return isValid;
+    }
+</script>
+
+
 </body>
 
 </html>

@@ -105,7 +105,7 @@ async def index():
         predicted_conducta = label_encoders['conducta'].inverse_transform([predicted_conducta])[0]
         socketio.emit('classified_answer', {'predicted_clasfinal': predicted_clasfinal, 'predicted_conducta': predicted_conducta})
 
-        # Solicitud a GPT-4
+        # Solicitud a LLM
         user_symptoms = f"Edad: {categorize_age(edad)}, Sexo: {sexo}, Fiebre: {fiebre}, Dolor de cabeza: {cefalea}, Dolor detrás de los ojos: {dolrretroo}, Dolores musculares: {malgias}, Dolor en las articulaciones: {artralgia}, Erupción cutánea: {erupcionr}, Dolor abdominal: {dolor_abdo}, Vómito: {vomito}, Diarrea: {diarrea}, Hipotensión: {hipotensio}, Hepatomegalia: {hepatomeg}"
         stream = client.chat.completions.create(
             model="gpt-4",
