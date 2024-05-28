@@ -41,7 +41,7 @@
           const { predicted_conducta, predicted_clasfinal } = data;
           // Mostrar la respuesta clasificada inmediatamente
           $("#classified-answer").text(
-            `El paciente es un caso ${predicted_conducta}, con dengue ${predicted_clasfinal}`
+            `El caso presentado tendria como clasificacion: ${predicted_clasfinal}, y el tipo de atencion mas probable seria: ${predicted_conducta} `
           );
         });
     
@@ -341,7 +341,7 @@
                 </div>
             </div>
             <div class="flex flex-col">
-                <h1 id="classified-answer" class="text-4xl font-semibold tracking-tighter text-gray-900 lg:text-5xl">
+                <h1 id="classified-answer" class="text-2xl font-semibold tracking-tighter text-gray-900 lg:text-4xl">
                     Detecta la gravedad del paciente,
                     <span class="text-gray-600">a partir de los sintomas</span>
                 </h1>
